@@ -1,0 +1,6 @@
+{
+  "name": "SmartMenu",
+  "description": "SmartMenu digital QR menu registration platform with instant plan selection, phone verification, Bakong KHQR checkout, and direct access to the management portal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
