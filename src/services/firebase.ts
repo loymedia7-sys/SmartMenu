@@ -3,16 +3,13 @@ import { getFirestore, initializeFirestore, Firestore } from 'firebase/firestore
 import { getAuth, Auth } from 'firebase/auth';
 
 export const firebaseConfig = {
-  projectId: "gen-lang-client-0706059584",
-  appId: "1:816300505970:web:d54ca0f7b994018787fbeb",
-  apiKey: "AIzaSyB9PBWxnejrvx4yI3-sN31R1N9qRU0aFoU",
-  authDomain: "gen-lang-client-0706059584.firebaseapp.com",
-  firestoreDatabaseId: "ai-studio-tableqrdigitalme-ef6d826c-a620-4caa-aa55-95f53285b6db",
-  storageBucket: "gen-lang-client-0706059584.firebasestorage.app",
-  messagingSenderId: "816300505970",
-  measurementId: "",
-  oAuthClientId: "816300505970-a890p6sdcv7fr9eht7ct9a9rgkvp7jhs.apps.googleusercontent.com",
-  recaptchaSiteKey: ""
+  apiKey: "AIzaSyCrbqEu1GhFj92d3KXVhZ7PfPhV53fjGRs",
+  authDomain: "gen-lang-client-0627433321.firebaseapp.com",
+  projectId: "gen-lang-client-0627433321",
+  storageBucket: "gen-lang-client-0627433321.firebasestorage.app",
+  messagingSenderId: "767560190946",
+  appId: "1:767560190946:web:54afb1ea6d750d5eba07bb",
+  firestoreDatabaseId: ""
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { 
   Sparkles, 
   Check, 
@@ -119,7 +119,7 @@ export function PricingPage({ navigate }: PricingPageProps) {
               </thead>
               <tbody className="divide-y divide-stone-200">
                 {COMPARISON_CATEGORIES.map((cat, catIdx) => (
-                  <>
+                  <Fragment key={`cat-group-${catIdx}`}>
                     <tr key={`cat-title-${catIdx}`} className="bg-stone-50 font-bold text-stone-900">
                       <td colSpan={5} className="py-3 px-6 text-xs uppercase tracking-wider bg-stone-100 text-stone-900 font-extrabold">
                         {cat.name}
@@ -136,7 +136,7 @@ export function PricingPage({ navigate }: PricingPageProps) {
                         <td className="py-3.5 px-4 text-center text-stone-600 font-mono">{feat.max}</td>
                       </tr>
                     ))}
-                  </>
+                  </Fragment>
                 ))}
               </tbody>
             </table>

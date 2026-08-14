@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { 
   UtensilsCrossed, 
   QrCode, 
@@ -349,7 +349,7 @@ export function LandingPage({ navigate }: LandingPageProps) {
                 </thead>
                 <tbody className="divide-y divide-stone-200">
                   {COMPARISON_CATEGORIES.map((cat, catIdx) => (
-                    <>
+                    <Fragment key={`cat-group-${catIdx}`}>
                       <tr key={`cat-${catIdx}`} className="bg-stone-50 font-bold text-stone-900">
                         <td colSpan={5} className="py-2.5 px-4 text-xs tracking-wider uppercase bg-stone-100/90 text-stone-800">
                           {cat.name}
@@ -366,7 +366,7 @@ export function LandingPage({ navigate }: LandingPageProps) {
                           <td className="py-3 px-3 text-center text-stone-600 font-mono">{feat.max}</td>
                         </tr>
                       ))}
-                    </>
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
