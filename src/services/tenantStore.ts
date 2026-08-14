@@ -15,6 +15,11 @@ const RESERVED_SLUGS = [
   'help', 'support', 'terms', 'privacy', 'menu', 'auth', 'verify', 'app', 'portal'
 ];
 
+// Utility to clean objects for Firestore (removes undefined fields)
+function sanitizeForFirestore<T>(obj: T): Record<string, any> {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 // Asynchronously sync tenants from Firestore cloud database
 export async function syncTenantsFromFirestore(): Promise<Tenant[]> {
   try {
@@ -33,11 +38,12 @@ export async function syncTenantsFromFirestore(): Promise<Tenant[]> {
         cloudTenants.forEach(t => map.set(t.id, t));
         const merged = Array.from(map.values());
         saveTenants(merged);
+        console.log(`[Firestore] Synced ${cloudTenants.length} tenants from cloud database.`);
         return merged;
       }
     }
-  } catch (err) {
-    console.warn('Firestore sync note (local fallback active):', err);
+  } catch (err: any) {
+    console.warn('[Firestore] Sync warning (Check Firebase Console -> Firestore Database & Security Rules):', err?.message || err);
   }
   return getStoredTenants();
 }
@@ -238,11 +244,18 @@ export function createTenant(data: RegistrationFormData, options: { phoneVerifie
 
   // Persist new tenant in Firestore cloud database
   try {
-    setDoc(doc(db, 'tenants', newTenant.id), newTenant).catch(e => {
-      console.warn('Firestore write warning:', e);
-    });
-  } catch (err) {
-    console.warn('Firestore write error:', err);
+    const cleanPayload = sanitizeForFirestore(newTenant);
+    console.log('[Firestore] Writing new tenant record to cloud...', cleanPayload);
+    setDoc(doc(db, 'tenants', newTenant.id), cleanPayload)
+      .then(() => {
+        console.log(`[Firestore] Successfully stored tenant "${newTenant.businessName}" (${newTenant.id}) in cloud database!`);
+      })
+      .catch((e: any) => {
+        console.error('[Firestore Error] Failed to write tenant to Firebase:', e?.code, e?.message || e);
+        console.warn('Note: If you see "permission-denied" or "not-found", please enable Firestore Database in Firebase Console and set Security Rules to allow read/write.');
+      });
+  } catch (err: any) {
+    console.error('[Firestore] Exception during write:', err?.message || err);
   }
 
   // Send auto notification credentials
@@ -291,9 +304,12 @@ export function updateTenantPlan(tenantSlug: string, newPlan: PlanId, billingCyc
 
   // Sync updated tenant to Firestore
   try {
-    setDoc(doc(db, 'tenants', tenants[index].id), tenants[index]).catch(e => console.warn('Firestore update warning:', e));
+    const cleanPayload = sanitizeForFirestore(tenants[index]);
+    setDoc(doc(db, 'tenants', tenants[index].id), cleanPayload)
+      .then(() => console.log(`[Firestore] Updated tenant plan in cloud for ${tenants[index].id}`))
+      .catch(e => console.warn('[Firestore] Update tenant warning:', e?.message || e));
   } catch (err) {
-    console.warn('Firestore error:', err);
+    console.warn('[Firestore] Error:', err);
   }
 
   // Update current session if matching
@@ -405,7 +421,8 @@ export function createPaymentSession(tenantSlug: string, planId: PlanId, billing
     localStorage.setItem(TRANSACTIONS_STORAGE_KEY, JSON.stringify(list.slice(0, 20)));
 
     // Save transaction to Firestore
-    setDoc(doc(db, 'transactions', session.transactionId), session).catch(e => console.warn('Firestore transaction log warning:', e));
+    const cleanSession = sanitizeForFirestore(session);
+    setDoc(doc(db, 'transactions', session.transactionId), cleanSession).catch(e => console.warn('[Firestore] Transaction log warning:', e?.message || e));
   } catch (e) {
     console.error(e);
   }
@@ -474,7 +491,8 @@ export function sendCredentialsNotification(tenant: Tenant, customSubject?: stri
 
     // Sync notification logs to Firestore
     logs.forEach(l => {
-      setDoc(doc(db, 'notifications', l.id), l).catch(e => console.warn('Firestore notification log warning:', e));
+      const cleanLog = sanitizeForFirestore(l);
+      setDoc(doc(db, 'notifications', l.id), cleanLog).catch(e => console.warn('[Firestore] Notification log warning:', e?.message || e));
     });
   } catch (e) {
     console.error(e);
@@ -570,9 +588,10 @@ export function addMenuItem(tenantId: string, item: Omit<MenuItem, 'id'>): Tenan
 
   // Sync to Firestore
   try {
-    setDoc(doc(db, 'tenants', tenants[index].id), tenants[index]).catch(e => console.warn('Firestore update warning:', e));
+    const cleanPayload = sanitizeForFirestore(tenants[index]);
+    setDoc(doc(db, 'tenants', tenants[index].id), cleanPayload).catch(e => console.warn('[Firestore] Update warning:', e?.message || e));
   } catch (err) {
-    console.warn('Firestore error:', err);
+    console.warn('[Firestore] Error:', err);
   }
   
   const current = getCurrentSession();
@@ -596,9 +615,10 @@ export function toggleItemAvailability(tenantId: string, itemId: string): Tenant
 
   // Sync to Firestore
   try {
-    setDoc(doc(db, 'tenants', tenants[index].id), tenants[index]).catch(e => console.warn('Firestore update warning:', e));
+    const cleanPayload = sanitizeForFirestore(tenants[index]);
+    setDoc(doc(db, 'tenants', tenants[index].id), cleanPayload).catch(e => console.warn('[Firestore] Update warning:', e?.message || e));
   } catch (err) {
-    console.warn('Firestore error:', err);
+    console.warn('[Firestore] Error:', err);
   }
 
   const current = getCurrentSession();
